@@ -143,7 +143,21 @@ class WebSearchCollector(BaseCollector):
             信息项列表
         """
         start_time = time.time()
-        self._logger.info("starting_web_search", query=query, max_results=max_results)
+        
+        # 安全检查：query 长度限制
+        if len(query) > self.settings.max_query_length:
+            self._logger.warning("query_too_long", 
+                               query_length=len(query),
+                               max_length=self.settings.max_query_length)
+            query = query[:self.settings.max_query_length]
+        
+        # 安全检查：query 基础清洗
+        query = query.strip()
+        if not query:
+            self._logger.warning("empty_query_after_sanitization")
+            return []
+        
+        self._logger.info("starting_web_search", query=query[:100], max_results=max_results)
         
         items = []
         errors: list[tuple[str, SearchError]] = []
@@ -206,8 +220,21 @@ class WebSearchCollector(BaseCollector):
         params = {"q": query, "num": max_results}
         
         async with self.session.get(search_url, params=params) as response:
+            # 安全检查：响应大小限制
+            if response.content_length and response.content_length > self.settings.max_response_size:
+                raise SearchError(
+                    SearchErrorType.UNKNOWN,
+                    f"Response too large: {response.content_length} bytes"
+                )
+            
             if response.status == 200:
                 data = await response.text()
+                # 再次检查实际内容大小
+                if len(data.encode('utf-8')) > self.settings.max_response_size:
+                    raise SearchError(
+                        SearchErrorType.UNKNOWN,
+                        f"Response content too large: {len(data)} bytes"
+                    )
                 return self._parse_jina_results(data)
             else:
                 raise Exception(f"HTTP {response.status}")
@@ -218,8 +245,21 @@ class WebSearchCollector(BaseCollector):
         data = {"q": query, "kl": "wt-wt"}
         
         async with self.session.post(search_url, data=data) as response:
+            # 安全检查：响应大小限制
+            if response.content_length and response.content_length > self.settings.max_response_size:
+                raise SearchError(
+                    SearchErrorType.UNKNOWN,
+                    f"Response too large: {response.content_length} bytes"
+                )
+            
             if response.status == 200:
                 html = await response.text()
+                # 再次检查实际内容大小
+                if len(html.encode('utf-8')) > self.settings.max_response_size:
+                    raise SearchError(
+                        SearchErrorType.UNKNOWN,
+                        f"Response content too large: {len(html)} bytes"
+                    )
                 return self._parse_duckduckgo_html(html, max_results)
             else:
                 raise Exception(f"HTTP {response.status}")
@@ -239,8 +279,22 @@ class WebSearchCollector(BaseCollector):
         }
         
         async with self.session.post(url, json=payload) as response:
+            # 安全检查：响应大小限制
+            if response.content_length and response.content_length > self.settings.max_response_size:
+                raise SearchError(
+                    SearchErrorType.UNKNOWN,
+                    f"Response too large: {response.content_length} bytes"
+                )
+            
             if response.status == 200:
                 data = await response.json()
+                # Tavily 返回 JSON，检查序列化后的大小
+                json_str = json.dumps(data)
+                if len(json_str.encode('utf-8')) > self.settings.max_response_size:
+                    raise SearchError(
+                        SearchErrorType.UNKNOWN,
+                        f"Response content too large: {len(json_str)} bytes"
+                    )
                 return self._parse_tavily_results(data)
             else:
                 raise Exception(f"HTTP {response.status}")

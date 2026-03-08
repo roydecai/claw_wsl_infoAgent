@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     
     # 搜索配置
     tavily_api_key: str = ""
+    max_query_length: int = 500  # query 最大长度限制
+    max_response_size: int = 10 * 1024 * 1024  # 响应大小限制 10MB
     
     # 日志配置
     log_level: str = "INFO"
