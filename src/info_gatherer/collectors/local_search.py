@@ -1,7 +1,6 @@
 """本地文件搜索收集器"""
 
 import os
-import re
 from pathlib import Path
 from typing import Optional
 import structlog

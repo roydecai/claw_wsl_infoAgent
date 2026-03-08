@@ -1,6 +1,5 @@
 """排序处理器"""
 
-from typing import Optional
 import structlog
 
 from ..models import InfoItem

@@ -1,7 +1,6 @@
 """收集器基类"""
 
 from abc import ABC, abstractmethod
-from typing import Optional
 import structlog
 
 from ..models import InfoItem, SourceType

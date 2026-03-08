@@ -4,11 +4,9 @@ import asyncio
 import argparse
 import sys
 import structlog
-from typing import Optional
 
 from .agent import InfoGathererAgent
 from .models import GatherRequest, SourceType
-from .config import get_settings
 
 
 def setup_logging():

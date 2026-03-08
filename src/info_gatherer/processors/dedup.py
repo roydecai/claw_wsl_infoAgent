@@ -1,7 +1,6 @@
 """去重处理器"""
 
 import hashlib
-from typing import Optional
 import structlog
 
 from ..models import InfoItem

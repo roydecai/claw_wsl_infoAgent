@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     default_output_format: str = "markdown"
     max_summary_length: int = 500
     
+    # 搜索配置
+    tavily_api_key: str = ""
+    
     # 日志配置
     log_level: str = "INFO"
     
