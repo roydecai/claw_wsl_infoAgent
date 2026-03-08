@@ -58,39 +58,45 @@ class InfoGathererAgent:
             logger.info("gather_cache_hit", query=request.query)
             return GatherResult.model_validate(cached_result)
 
-        # 步骤1：并行收集信息
-        all_items, collect_error_count = await self._collect(request)
-        result.total_count = len(all_items)
-        result.error_count = collect_error_count
+        try:
+            # 步骤1：并行收集信息
+            all_items, collect_error_count = await self._collect(request)
+            result.total_count = len(all_items)
+            result.error_count = collect_error_count
 
-        # 步骤2：去重
-        unique_items, dedup_count = self.dedup_processor.process(all_items)
-        result.dedup_count = dedup_count
+            # 步骤2：去重
+            unique_items, dedup_count = self.dedup_processor.process(all_items)
+            result.dedup_count = dedup_count
 
-        # 步骤3：计算相关度并排序
-        for item in unique_items:
-            item.relevance_score = self.rank_processor.compute_relevance_score(item, request.query)
-        sorted_items = self.rank_processor.process(unique_items, "relevance")
+            # 步骤3：计算相关度并排序
+            for item in unique_items:
+                item.relevance_score = self.rank_processor.compute_relevance_score(item, request.query)
+            sorted_items = self.rank_processor.process(unique_items, "relevance")
 
-        # 步骤4：生成摘要
-        final_items = self.summarize_processor.process(sorted_items)
+            # 步骤4：生成摘要
+            final_items = self.summarize_processor.process(sorted_items)
 
-        # 限制结果数量
-        result.items = final_items[: request.max_results]
-        result.duration_seconds = time.time() - start_time
+            # 限制结果数量
+            result.items = final_items[: request.max_results]
+            result.duration_seconds = time.time() - start_time
 
-        self.cache_manager.set(cache_key, result.model_dump(mode="json"))
+            self.cache_manager.set(cache_key, result.model_dump(mode="json"))
 
-        logger.info(
-            "gather_completed",
-            total=result.total_count,
-            unique=len(result.items),
-            dedup=result.dedup_count,
-            errors=result.error_count,
-            duration=result.duration_seconds,
-        )
+            logger.info(
+                "gather_completed",
+                total=result.total_count,
+                unique=len(result.items),
+                dedup=result.dedup_count,
+                errors=result.error_count,
+                duration=result.duration_seconds,
+            )
 
-        return result
+            return result
+        finally:
+            # 清理 WebSearchCollector 的 session
+            web_collector = self.collectors.get(SourceType.WEB_SEARCH)
+            if web_collector and hasattr(web_collector, 'close'):
+                await web_collector.close()
 
     async def _collect(self, request: GatherRequest) -> tuple[list[InfoItem], int]:
         """并行收集信息。"""
