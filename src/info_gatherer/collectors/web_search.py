@@ -123,9 +123,9 @@ class WebSearchCollector(BaseCollector):
             elif status_code == 429:
                 return SearchError(SearchErrorType.HTTP_429, "Too many requests", status_code)
             elif 500 <= status_code < 600:
-                return SearchError(SearchErrorType.HTTP_5XX, f"Server error", status_code)
+                return SearchError(SearchErrorType.HTTP_5XX, "Server error", status_code)
             elif 400 <= status_code < 500:
-                return SearchError(SearchErrorType.HTTP_4XX, f"Client error", status_code)
+                return SearchError(SearchErrorType.HTTP_4XX, "Client error", status_code)
         
         if isinstance(exception, json.JSONDecodeError):
             return SearchError(SearchErrorType.PARSE_ERROR, str(exception))
@@ -217,7 +217,7 @@ class WebSearchCollector(BaseCollector):
     
     async def _search_jina_ai(self, query: str, max_results: int) -> list[InfoItem]:
         """使用 Jina AI 搜索"""
-        search_url = f"https://r.jina.ai/search"
+        search_url = "https://r.jina.ai/search"
         params = {"q": query, "num": max_results}
         
         async with self.session.get(search_url, params=params) as response:
