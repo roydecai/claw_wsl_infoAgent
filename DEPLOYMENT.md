@@ -18,6 +18,7 @@
 ### 2. 定时任务
 - **早报**: 每天 8:30 自动生成
 - **晚报**: 每天 20:30 自动生成
+- **飞书文档**: https://feishu.cn/docx/P13IdtCyvojTcfxgVmVcakaun3f
 
 ---
 
@@ -121,8 +122,16 @@ python -c "from info_gatherer.processors.summarize import SummarizeProcessor; ..
 - 定时任务日志: `logs/cron_*.log`
 
 ### 报告位置
-- 报告目录: `reports/`
-- 命名格式: `YYYY-MM-DD_早报.md` / `YYYY-MM-DD_晚报.md`
+- **本地报告**: `reports/YYYY-MM-DD_早报/晚报.md`
+- **飞书文档**: https://feishu.cn/docx/P13IdtCyvojTcfxgVmVcakaun3f
+  - 已为您设置编辑权限
+  - 每日报告需手动复制到飞书文档（自动化集成待开发）
+
+### 飞书文档自动化（可选）
+当前需要手动将本地报告复制到飞书文档。如需完全自动化，需要：
+1. 申请飞书开放平台应用权限
+2. 配置飞书 App ID 和 App Secret
+3. 更新脚本调用飞书 API 自动写入
 
 ### 故障排查
 ```bash

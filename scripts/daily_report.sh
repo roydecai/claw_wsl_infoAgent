@@ -1,5 +1,5 @@
 #!/bin/bash
-# infoAgent 每日报告生成脚本
+# infoAgent 每日报告生成脚本 - 支持飞书文档输出
 
 # 设置环境变量
 export INFO_GATHERER_TAVILY_API_KEY="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"
@@ -29,7 +29,7 @@ else
     QUERY="今日热点新闻 科技动态"
 fi
 
-# 生成报告
+# 生成报告（本地文件）
 OUTPUT_FILE="/home/wenweicai/.openclaw/workspace/info_gatherer/reports/${DATE}_${REPORT_TYPE}.md"
 
 # 确保报告目录存在
@@ -49,3 +49,8 @@ echo "报告生成时间: $(date)" >> "$OUTPUT_FILE"
 echo "================================" >> "$OUTPUT_FILE"
 
 echo "${REPORT_TYPE}已生成: $OUTPUT_FILE"
+
+# 输出飞书文档提示
+echo ""
+echo "📄 飞书文档报告: https://feishu.cn/docx/P13IdtCyvojTcfxgVmVcakaun3f"
+echo "💡 请手动将报告内容复制到飞书文档中（自动化集成待开发）"
