@@ -16,41 +16,9 @@ cd /home/wenweicai/.openclaw/workspace/info_gatherer
 # 激活虚拟环境
 source .venv/bin/activate
 
-# 获取当前日期
-DATE=$(date +"%Y-%m-%d")
-TIME=$(date +"%H:%M")
+# 生成新版报告（按主题分类、带超链接）
+python3 scripts/feishu_report_v2.py
 
-# 根据时间判断是早报还是晚报
-if [[ "$TIME" < "12:00" ]]; then
-    REPORT_TYPE="早报"
-    QUERY="今日科技新闻 AI发展"
-else
-    REPORT_TYPE="晚报"
-    QUERY="今日热点新闻 科技动态"
-fi
-
-# 生成报告（本地文件）
-OUTPUT_FILE="/home/wenweicai/.openclaw/workspace/info_gatherer/reports/${DATE}_${REPORT_TYPE}.md"
-
-# 确保报告目录存在
-mkdir -p /home/wenweicai/.openclaw/workspace/info_gatherer/reports
-
-echo "================================" >> "$OUTPUT_FILE"
-echo "infoAgent ${REPORT_TYPE} - ${DATE} ${TIME}" >> "$OUTPUT_FILE"
-echo "================================" >> "$OUTPUT_FILE"
-echo "" >> "$OUTPUT_FILE"
-
-# 执行信息收集
-python -m info_gatherer "$QUERY" -n 10 --output markdown >> "$OUTPUT_FILE" 2>&1
-
-echo "" >> "$OUTPUT_FILE"
-echo "================================" >> "$OUTPUT_FILE"
-echo "报告生成时间: $(date)" >> "$OUTPUT_FILE"
-echo "================================" >> "$OUTPUT_FILE"
-
-echo "${REPORT_TYPE}已生成: $OUTPUT_FILE"
-
-# 输出飞书文档提示
 echo ""
 echo "📄 飞书文档报告: https://feishu.cn/docx/P13IdtCyvojTcfxgVmVcakaun3f"
-echo "💡 请手动将报告内容复制到飞书文档中（自动化集成待开发）"
+echo "💡 请检查飞书文档内容，如需修改请手动编辑"
