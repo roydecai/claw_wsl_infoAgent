@@ -31,6 +31,14 @@ class Settings(BaseSettings):
     # 日志配置
     log_level: str = "INFO"
     
+    # LLM 配置（用于智能摘要）
+    llm_api_key: str = ""  # LLM API Key
+    llm_base_url: str = "https://api.openai.com/v1"  # LLM API 基础URL
+    llm_model: str = "gpt-4o-mini"  # 默认模型
+    llm_max_tokens: int = 200  # 摘要最大token数
+    llm_temperature: float = 0.3  # 生成温度
+    llm_timeout_seconds: int = 10  # LLM请求超时
+    
     model_config = SettingsConfigDict(
         env_prefix="INFO_GATHERER_",
         env_file=".env",

@@ -1,5 +1,6 @@
 """测试处理器模块"""
 
+import asyncio
 from datetime import datetime
 from info_gatherer.models import InfoItem, SourceType
 from info_gatherer.processors.dedup import DedupProcessor
@@ -119,40 +120,40 @@ class TestSummarizeProcessor:
     """测试摘要处理器"""
 
     def test_generate_summary_short_content(self):
-        processor = SummarizeProcessor(max_summary_length=100)
+        processor = SummarizeProcessor(max_summary_length=100, use_llm=False)
         content = "Short content"
-        summary = processor._generate_summary(content)
+        summary = processor._generate_simple_summary(content)
         assert summary == content
 
     def test_generate_summary_long_content_truncated(self):
-        processor = SummarizeProcessor(max_summary_length=50)
+        processor = SummarizeProcessor(max_summary_length=50, use_llm=False)
         content = "A" * 100
-        summary = processor._generate_summary(content)
+        summary = processor._generate_simple_summary(content)
         assert len(summary) <= 53  # 50 + "..."
 
     def test_process_adds_summary(self):
-        processor = SummarizeProcessor()
+        processor = SummarizeProcessor(use_llm=False)
         items = [
             InfoItem(id="1", title="A", source="test", source_type=SourceType.WEB_SEARCH, content="Some content here"),
         ]
-        result = processor.process(items)
+        result = asyncio.run(processor.process(items))
         assert result[0].summary is not None
 
     def test_process_preserves_existing_summary(self):
-        processor = SummarizeProcessor()
+        processor = SummarizeProcessor(use_llm=False)
         items = [
             InfoItem(id="1", title="A", source="test", source_type=SourceType.WEB_SEARCH, content="content", summary="Existing"),
         ]
-        result = processor.process(items)
+        result = asyncio.run(processor.process(items))
         assert result[0].summary == "Existing"
 
     def test_generate_overview_empty_items(self):
-        processor = SummarizeProcessor()
+        processor = SummarizeProcessor(use_llm=False)
         overview = processor.generate_overview([], "query")
         assert "未找到" in overview
 
     def test_generate_overview_with_items(self):
-        processor = SummarizeProcessor()
+        processor = SummarizeProcessor(use_llm=False)
         items = [
             InfoItem(id="1", title="A", source="Source1", source_type=SourceType.WEB_SEARCH),
             InfoItem(id="2", title="B", source="Source1", source_type=SourceType.WEB_SEARCH),
@@ -162,3 +163,9 @@ class TestSummarizeProcessor:
         assert "test query" in overview
         assert "3" in overview
         assert "2" in overview  # 2 different sources
+
+    def test_llm_summary_disabled_without_api_key(self):
+        """测试无API Key时LLM摘要自动禁用"""
+        processor = SummarizeProcessor(use_llm=True)
+        # 如果没有配置API Key，use_llm应该为False
+        assert not processor.use_llm or processor.settings.llm_api_key

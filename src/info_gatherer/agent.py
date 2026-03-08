@@ -73,8 +73,8 @@ class InfoGathererAgent:
                 item.relevance_score = self.rank_processor.compute_relevance_score(item, request.query)
             sorted_items = self.rank_processor.process(unique_items, "relevance")
 
-            # 步骤4：生成摘要
-            final_items = self.summarize_processor.process(sorted_items)
+            # 步骤4：生成摘要（支持LLM增强）
+            final_items = await self.summarize_processor.process(sorted_items)
 
             # 限制结果数量
             result.items = final_items[: request.max_results]
