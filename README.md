@@ -132,9 +132,26 @@ asyncio.run(main())
 
 ## 后续计划
 
-- [ ] 增强数据质量（来源权重、可信度评分）
+- [x] 增强数据质量（来源权重、可信度评分）✅ 已完成
+- [x] 智能摘要（LLM 增强）✅ 已完成
 - [ ] 持续监控能力（定时任务、主题订阅）
 - [ ] 接入内部知识与业务系统
+
+## LLM 增强摘要（可选）
+
+配置 LLM API 可启用智能摘要生成：
+
+```bash
+# 配置 LLM（支持 OpenAI、OpenRouter、本地模型等）
+export INFO_GATHERER_LLM_API_KEY=your-api-key
+export INFO_GATHERER_LLM_BASE_URL=https://api.openai.com/v1
+export INFO_GATHERER_LLM_MODEL=gpt-4o-mini
+
+# 运行时会自动使用 LLM 生成中文摘要
+python -m info_gatherer "Python tutorial"
+```
+
+未配置 LLM 时，会自动回退到简单摘要。
 
 ---
 
