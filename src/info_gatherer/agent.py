@@ -187,3 +187,14 @@ class InfoGathererAgent:
     def _build_cache_key(request: GatherRequest) -> str:
         sources = ",".join(sorted(source.value for source in request.sources))
         return f"query:{request.query}|max:{request.max_results}|sources:{sources}|time:{request.time_range}"
+    
+    async def close(self) -> None:
+        """关闭 Agent 并释放资源"""
+        logger.debug("agent_closing")
+        
+        # 关闭 WebSearchCollector 的 session
+        web_collector = self.collectors.get(SourceType.WEB_SEARCH)
+        if web_collector and hasattr(web_collector, 'close'):
+            await web_collector.close()
+        
+        logger.debug("agent_closed")

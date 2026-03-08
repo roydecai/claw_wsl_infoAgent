@@ -36,10 +36,11 @@ class SearchErrorType(str, Enum):
     UNKNOWN = "unknown"
 
 
-class SearchError:
-    """搜索错误信息"""
+class SearchError(Exception):
+    """搜索错误异常"""
     
     def __init__(self, error_type: SearchErrorType, message: str, status_code: int = None):
+        super().__init__(message)
         self.error_type = error_type
         self.message = message
         self.status_code = status_code

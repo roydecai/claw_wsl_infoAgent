@@ -115,22 +115,26 @@ async def main():
     # 创建 Agent
     agent = InfoGathererAgent()
     
-    # 添加本地搜索路径
-    if args.local_paths:
-        for path in args.local_paths:
-            agent.add_local_search_path(path)
-    
-    # 执行收集
-    print(f"正在收集关于「{args.query}」的信息...")
-    result = await agent.gather(request)
-    
-    # 生成报告
-    report = agent.generate_report(result, args.output)
-    print("\n" + report)
-    
-    # 返回状态码
-    if not result.items:
-        sys.exit(1)
+    try:
+        # 添加本地搜索路径
+        if args.local_paths:
+            for path in args.local_paths:
+                agent.add_local_search_path(path)
+        
+        # 执行收集
+        print(f"正在收集关于「{args.query}」的信息...")
+        result = await agent.gather(request)
+        
+        # 生成报告
+        report = agent.generate_report(result, args.output)
+        print("\n" + report)
+        
+        # 返回状态码
+        if not result.items:
+            sys.exit(1)
+    finally:
+        # 确保资源释放
+        await agent.close()
 
 
 if __name__ == "__main__":
